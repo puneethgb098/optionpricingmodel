@@ -1,19 +1,10 @@
-# 🎈 Blank app template
+# Black-Scholes Option Pricing and Greek Visualizations
 
-A simple Streamlit app template for you to modify!
+This application provides a user-friendly interface to perform option pricing using the Black-Scholes model and visualize the associated Greeks. It also includes a Monte Carlo simulation to forecast potential asset price paths over time.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
+## Features
 
-### How to run it on your own machine
-
-1. Install the requirements
-
-   ```
-   $ pip install -r requirements.txt
-   ```
-
-2. Run the app
-
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+- **Black-Scholes Pricing**: Calculate the theoretical price of European Call and Put options based on user inputs.
+- **Greeks Visualization**: Visualize Delta, Gamma, Theta, Vega, and Rho for selected options.
+- **Monte Carlo Simulation**: Simulate asset price paths and visualize the potential outcomes based on volatility and time to expiry.
+- **Dynamic Input**: Adjust parameters via sliders and input fields for real-time updates to calculations and visualizations.
