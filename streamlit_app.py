@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from datetime import date, datetime, timedelta
-from plotly import graph_objects as go
+import plotly.graph_objs as go
 import seaborn as sns
 from scipy.stats import norm
 import requests
