@@ -160,16 +160,8 @@ def binomial_pricing_visualization(spot_price, strike_price, t, sigma, r, num_st
     fig.update_layout(title="Binomial Tree Stock Prices", xaxis_title="Steps", yaxis_title="Stock Price",yaxis_type="log",width=1000, height=600)
     return fig
 
-def fetch_nifty():
-    try:
-        nifty_latest = yf.download('^NSEI', interval = '1m', period = '1d')
-        nifty_latest = round(nifty_latest.Close[-1], 1)
-        return nifty_latest
-    except:
-        return 25000.0
-
 def main():
-    nifty_price = fetch_nifty()
+    nifty_price = 250000.0
 
     strike_price = 25000.0
     time_to_expiry = 1.0
