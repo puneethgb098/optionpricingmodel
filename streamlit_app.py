@@ -160,9 +160,12 @@ def binomial_pricing_visualization(spot_price, strike_price, t, sigma, r, num_st
     return fig
 
 def fetch_nifty():
-    nifty_data = yf.download('^NSEI', interval='1m', period='1d')
-    nifty_latest = nifty_data['Close'][-1]  # Get the last close price
-    return float(nifty_latest)  # Ensure it is returned as a float
+    try:
+        nifty_latest = yf.download('^NSEI', interval = '1m', period = '1d')
+        nifty_latest = round(nifty_latest.Close[-1], 1)
+        return nifty_latest
+    except:
+        return 25000.0
 
 def main():
     st.title("Black-Scholes Option Pricing and Greek Visualizations")
