@@ -169,55 +169,74 @@ def fetch_nifty():
         return 25000.0
 
 def main():
-    st.title("Black-Scholes Option Pricing and Greek Visualizations")
-
     nifty_price = fetch_nifty()
-    st.sidebar.header("Inputs for Black Scholes")
-    
-    strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0)
-    time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=1.0)
-    option_type = st.selectbox("Option Type", ['Call', 'Put'])
-    spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0)
-    volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25)
-    risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01)
 
-    bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
+    strike_price = 25000.0
+    time_to_expiry = 1.0
+    option_type = 'Call'
+    spot_price = nifty_price
+    volatility = 20.0
+    risk_free_rate = 5.0
+    num_steps=10.0
 
-    option_price = bs_model.option(option_type)
-    st.sidebar.write(f"Option Price: {option_price}")
+    option = st.sidebar.selectbox("Pick a strategy", ['Black Scholes Pricing', 'Monte Carlo Simulation', 'Binomial Option Pricing American Options'], key='option_strategy')
 
-    greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho']
-    for greek in greek_types:
-        fig = bs_model.greek_visualisation(option_type, greek)
-        st.plotly_chart(fig)
+    if option == 'Black Scholes Pricing':
+        st.title("Black-Scholes Option Pricing and Greek Visualizations")
+        strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
+        time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
+        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
+        spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
+        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
+        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
+        
+        st.sidebar.header("Inputs for Black Scholes")
+        bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
+        option_price = bs_model.option(option_type)
+        st.sidebar.write(f"Option Price: {option_price}")
+        greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho']
+        for greek in greek_types:
+            fig = bs_model.greek_visualisation(option_type, greek)
+            st.plotly_chart(fig)
 
-    st.sidebar.header("Inputs for Monte Carlo Simulation")
-    num_steps = st.sidebar.slider("Number of Steps", value=252, min_value=1)
-    num_simulations = st.sidebar.slider("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100)
-
-    if st.sidebar.button("Run Monte Carlo Simulation"):
+    elif option == 'Monte Carlo Simulation':
+        st.title("Monte Carlo Simulation for European Options")
+        st.sidebar.header("Inputs for Monte Carlo Simulation")
+        num_steps = st.sidebar.slider("Number of Steps", value=252, min_value=1, key='num_steps_mc')
+        num_simulations = st.sidebar.slider("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
+        strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
+        time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
+        spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
+        volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
+        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
+        
+        bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
         monte_carlo_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations))
-        st.sidebar.write(f"Monte Carlo Option Price: {monte_carlo_price}")
-        simulation_fig = monte_carlo_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility / 100, risk_free_rate / 100, num_simulations, int(num_steps))
-        st.plotly_chart(simulation_fig)
-
-    st.sidebar.header("Binomial Pricing for American Options")
-    num_steps = st.sidebar.slider("Number of Steps", value=10, min_value=1, max_value=30, step=1)
-
-    if st.sidebar.button("Run Binomial Option Pricing"):
+        if st.sidebar.button("Run"):
+            st.sidebar.write(f"Monte Carlo Option Price: {monte_carlo_price}")
+            simulation_fig = monte_carlo_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility / 100, risk_free_rate / 100, num_simulations, int(num_steps))
+            st.plotly_chart(simulation_fig)
+            
+    else:
+        st.sidebar.header("Binomial Pricing for American Options")
         spot_price = st.sidebar.slider("Stock Price", min_value=0.0, max_value=30000.0, value=24975.0, step=1.0)
         strike_price = st.sidebar.slider("Strike Price", min_value=0.0, max_value=25000.0, value=30000.0, step=1.0)
         volatility = st.sidebar.slider("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
         risk_free_rate = st.sidebar.slider("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
         time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", min_value=0.0, max_value=2.0, value=1.0)
+        num_steps = st.sidebar.slider("Number of Steps", value=10.0, min_value=1.0, max_value=30.0, step=1.0)
         
-    binomial_option_price = bs_model.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate,num_steps, volatility, option_type)
-    st.sidebar.write(f"Binomial Option Price: {binomial_option_price:.2f}")
-    binomial_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type)
-    st.plotly_chart(binomial_fig)
+        bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
+        binomial_option_price = bs_model.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate,num_steps, volatility, option_type)
+        
+        if st.sidebar.button("Run"):
+            st.sidebar.write(f"Binomial Option Price: {binomial_option_price:.2f}")
+            binomial_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, int(num_steps), option_type)
+            st.plotly_chart(binomial_fig)
 
 if __name__ == "__main__":
     main()
+
 
 
 st.sidebar.text("")
