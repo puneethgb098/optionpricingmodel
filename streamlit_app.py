@@ -249,7 +249,6 @@ def main():
         risk_free_rate = st.sidebar.slider("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
         time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", min_value=0.0, max_value=2.0, value=1.0)
         num_steps = st.sidebar.slider("Number of Steps", value=10.0, min_value=1.0, max_value=30.0, step=1.0)
-        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
         
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
         binomial_option_price = bs_model.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate,num_steps, volatility, option_type)
