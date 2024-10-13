@@ -217,11 +217,11 @@ def main():
         st.sidebar.header("Inputs for Black Scholes")
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
         option_price = bs_model.option(option_type)
-        st.sidebar.write(f"Option Price: {option_price}")
         
         st.subheader("Greek Visualizations")
 
         if st.sidebar.button("Run"): 
+            st.sidebar.write(f"Option Price: {option_price}")
             greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho']
             for greek in greek_types:
                 fig = bs_model.greek_visualisation(option_type, greek)
@@ -260,10 +260,9 @@ def main():
         bs = BlackScholes(risk_free_rate, spot_price, strike_price, time_to_expiry, volatility)
 
         option_price = bs.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate, num_steps, volatility, option_type.lower())
-    
-        st.write(f"The calculated option value is: **{option_price:.2f}**")
 
         if st.sidebar.button('Run'):
+            st.sidebar.write(f"The calculated option value is: **{option_price:.2f}**")
             binomial_tree_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type)
             st.plotly_chart(binomial_tree_fig)
 
