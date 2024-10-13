@@ -183,10 +183,10 @@ def main():
 
     if option == 'Black Scholes Pricing':
         st.title("Black-Scholes Option Pricing and Greek Visualizations")
+        spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
         strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
         time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
-        spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
         volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
         risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
         
@@ -208,9 +208,9 @@ def main():
         st.sidebar.header("Inputs for Monte Carlo Simulation")
         num_steps = st.sidebar.slider("Number of Steps", value=252, min_value=1, key='num_steps_mc')
         num_simulations = st.sidebar.slider("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
+        spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
         strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
         time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
-        spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
         volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
         risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
         
