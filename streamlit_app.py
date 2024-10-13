@@ -243,6 +243,7 @@ def main():
     else:
         st.sidebar.header("Inputs")
         st.title("Binomial Pricing for American Options")
+        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
         spot_price = st.sidebar.slider("Stock Price", min_value=0.0, max_value=30000.0, value=24975.0, step=1.0)
         strike_price = st.sidebar.slider("Strike Price", min_value=0.0, max_value=25000.0, value=30000.0, step=1.0)
         volatility = st.sidebar.slider("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
