@@ -86,7 +86,7 @@ class BlackScholes:
         max_s = self.s * 1.09
         spot_values = np.linspace(min_s, max_s, 200)
 
-        greek_values = [BlackScholes(self.r, self.s, self.k, self.t, self.sigma).greeks(option_type)[greek] for s in spot_values]
+        greek_values = [BlackScholes(self.r, s, self.k, self.t, self.sigma).greeks(option_type)[greek] for s in spot_values]
         current_greek_value = BlackScholes(self.r, self.s, self.k, self.t, self.sigma).greeks(option_type)[greek]
         fig.add_trace(go.Scatter(x=spot_values, y=greek_values, mode='lines', name=greek.capitalize(), line=dict(color=line_color, width=3)))
         fig.add_trace(go.Scatter(x=[self.s], y=[current_greek_value], mode='markers', name=f'Current {greek.capitalize()}', marker=dict(color='black', size=7)))
@@ -157,11 +157,19 @@ def binomial_pricing_visualization(spot_price, strike_price, t, sigma, r, num_st
         for j in range(i + 1):
             fig.add_trace(go.Scatter(x=[i], y=[prices[j, i]],mode="markers+text",text=[f'{prices[j, i]:.2f}'],textposition="top center",marker=dict(size=8)))
 
-    fig.update_layout(title="Binomial Tree Stock Prices", xaxis_title="Steps", yaxis_title="Stock Price",yaxis_type="log",width=1000, height=600,showlegend=False)
+    fig.update_layout(title="Binomial Tree Stock Prices", xaxis_title="Steps", yaxis_title="Stock Price",yaxis_type="log",width=1000, height=600)
     return fig
 
+def fetch_nifty():
+    try:
+        nifty_latest = yf.download('^NSEI', interval = '1m', period = '1d')
+        nifty_latest = round(nifty_latest.Close[-1], 1)
+        return nifty_latest
+    except:
+        return 25000.0
+
 def main():
-    nifty_price = 250000.0
+    nifty_price = fetch_nifty()
 
     strike_price = 25000.0
     time_to_expiry = 1.0
@@ -175,18 +183,21 @@ def main():
 
     if option == 'Black Scholes Pricing':
         st.title("Black-Scholes Option Pricing and Greek Visualizations")
-        spot_price = st.sidebar.slider('Stock Price', value=25000.0, min_value=1.0, max_value=40000.0, step=5.0, key='spot_price')
         strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
         time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
+        spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
         volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
         risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
         
+        st.sidebar.header("Inputs for Black Scholes")
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
         option_price = bs_model.option(option_type)
         st.sidebar.write(f"Option Price: {option_price}")
+        
+        st.subheader("Greek Visualizations")
 
-         if st.sidebar.button("Run"): 
+        if st.sidebar.button("Run"): 
             greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho']
             for greek in greek_types:
                 fig = bs_model.greek_visualisation(option_type, greek)
