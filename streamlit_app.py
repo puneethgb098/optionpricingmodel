@@ -175,7 +175,7 @@ def main():
 
     if option == 'Black Scholes Pricing':
         st.title("Black-Scholes Option Pricing and Greek Visualizations")
-        spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
+        spot_price = st.sidebar.slider('Stock Price', value=25000.0, min_value=1.0, max_value=40000.0, step=5.0, key='spot_price')
         strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
         time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
