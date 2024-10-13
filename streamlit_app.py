@@ -182,14 +182,15 @@ def main():
         volatility = st.sidebar.slider('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
         risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
         
-        st.sidebar.header("Inputs for Black Scholes")
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
         option_price = bs_model.option(option_type)
         st.sidebar.write(f"Option Price: {option_price}")
-        greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho']
-        for greek in greek_types:
-            fig = bs_model.greek_visualisation(option_type, greek)
-            st.plotly_chart(fig)
+
+         if st.sidebar.button("Run"): 
+            greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho']
+            for greek in greek_types:
+                fig = bs_model.greek_visualisation(option_type, greek)
+                st.plotly_chart(fig)
 
     elif option == 'Monte Carlo Simulation':
         st.title("Monte Carlo Simulation for European Options")
