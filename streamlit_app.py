@@ -183,6 +183,7 @@ def main():
 
     if option == 'Black Scholes Pricing':
         st.title("Black-Scholes Option Pricing and Greek Visualizations")
+        st.sidebar.header("Inputs")
         spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
         strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
         time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
@@ -205,7 +206,7 @@ def main():
 
     elif option == 'Monte Carlo Simulation':
         st.title("Monte Carlo Simulation for European Options")
-        st.sidebar.header("Inputs for Monte Carlo Simulation")
+        st.sidebar.header("Inputs")
         num_steps = st.sidebar.slider("Number of Steps", value=252, min_value=1, key='num_steps_mc')
         num_simulations = st.sidebar.slider("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
         spot_price = st.sidebar.slider('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
@@ -222,7 +223,7 @@ def main():
             st.plotly_chart(simulation_fig)
             
     else:
-        st.sidebar.header("Binomial Pricing for American Options")
+        st.sidebar.header("Inputs")
         st.title("Binomial Pricing for American Options")
         spot_price = st.sidebar.slider("Stock Price", min_value=0.0, max_value=30000.0, value=24975.0, step=1.0)
         strike_price = st.sidebar.slider("Strike Price", min_value=0.0, max_value=25000.0, value=30000.0, step=1.0)
