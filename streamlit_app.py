@@ -157,7 +157,7 @@ def binomial_pricing_visualization(spot_price, strike_price, t, sigma, r, num_st
         for j in range(i + 1):
             fig.add_trace(go.Scatter(x=[i], y=[prices[j, i]],mode="markers+text",text=[f'{prices[j, i]:.2f}'],textposition="top center",marker=dict(size=8)))
 
-    fig.update_layout(title="Binomial Tree Stock Prices", xaxis_title="Steps", yaxis_title="Stock Price",yaxis_type="log",width=1000, height=600)
+    fig.update_layout(title="Binomial Tree Stock Prices", xaxis_title="Steps", yaxis_title="Stock Price",yaxis_type="log",width=1000, height=600,showlegend=False)
     return fig
 
 def main():
