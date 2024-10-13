@@ -228,7 +228,7 @@ def main():
                 st.plotly_chart(fig)
 
     elif option == 'Monte Carlo Simulation':
-        st.title("Monte Carlo Simulation")
+        st.title("Monte Carlo Simulation Option Pricing and Simulating Asset prices")
         st.sidebar.header("Inputs")
         num_steps = st.sidebar.number_input("Number of Steps", value=252, min_value=1, key='num_steps_mc')
         num_simulations = st.sidebar.number_input("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
@@ -247,7 +247,7 @@ def main():
             
     else:
         st.sidebar.header("Inputs")
-        st.title("Binomial Pricing for Nifty")
+        st.title("Binomial Option Pricing and Forecasting Asset Prices")
 
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
         spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=5.0)
