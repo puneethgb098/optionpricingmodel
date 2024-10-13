@@ -115,14 +115,6 @@ class BlackScholes:
 
         for i in range(n + 1):
             price[i] = s * (u ** i) * (d ** (n - i))
-
-        if option_type == 'call':
-            values = np.maximum(0, price - k)
-        elif option_type == 'put':
-            values = np.maximum(0, k - price)
-        else:
-            raise ValueError("option_type should be 'call' or 'put'")
-
     
         for j in range(n - 1, -1, -1):
             for i in range(j + 1):
@@ -130,11 +122,6 @@ class BlackScholes:
             
                 values[i] = (p * values[i + 1] + (1 - p) * values[i]) * np.exp(-r * dt)
             
-                if option_type == 'call':
-                    values[i] = np.maximum(values[i], price[i] - k)
-                elif option_type == 'put':
-                    values[i] = np.maximum(values[i], k - price[i])
-
         return values[0]
 
 
