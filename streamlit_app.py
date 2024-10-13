@@ -104,15 +104,15 @@ class BlackScholes:
     def american_option_pricing(self, s, k, t, r, n, sigma, option_type='call'):
         n = int(n)
         dt = t / n
-        u = np.exp(sigma * np.sqrt(dt))  # Up factor
-        d = 1 / u                        # Down factor
-        p = (np.exp(r * dt) - d) / (u - d)  # Risk-neutral probability
+        u = np.exp(sigma * np.sqrt(dt)) 
+        d = 1 / u                       
+        p = (np.exp(r * dt) - d) / (u - d)  
 
         stock_price = np.zeros((n + 1, n + 1))
         option_value = np.zeros((n + 1, n + 1))
 
         for i in range(n + 1):
-            option_value[i] = s * (u ** i) * (d ** (n - i))
+            stock_price[i, n] = s * (u ** i) * (d ** (n - i))
 
         if option_type == 'call':
             for i in range(n + 1):
@@ -125,15 +125,17 @@ class BlackScholes:
     
         for j in range(n - 1, -1, -1):
             for i in range(j + 1):
-                option_value[i] = s * (u ** i) * (d ** (j - i))
+                option_value[i, j] = np.exp(-r * dt) * (p * option_value[i, j + 1] + (1 - p) * option_value[i + 1, j + 1])
+           
+                if option_type == 'call':
+                    option_value[i, j] = max(option_value[i, j], stock_price[i, j] - k)
+                elif option_type == 'put':
+                    option_value[i, j] = max(option_value[i, j], k - stock_price[i, j])
             
-                option_value[i] = (p * option_value[i + 1] + (1 - p) * option_value[i]) * np.exp(-r * dt)
-            if option_type == 'call':
-                option_value[i, j] = max(option_value[i, j], stock_price[i, j] - k)
-            elif option_type == 'put':
-                option_value[i, j] = max(option_value[i, j], k - stock_price[i, j])
+                stock_price[i, j] = stock_price[i, j + 1] * d
 
         return option_value[0, 0]
+
 
 
 def monte_carlo_pricing_visualization(option_value, strike_price, time_to_expiry, volatility, risk_free_rate, num_simulations=1000, num_steps=252):
@@ -156,9 +158,9 @@ def monte_carlo_pricing_visualization(option_value, strike_price, time_to_expiry
 
 
 def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type='Call'):
-    dt = time_to_expiry / num_steps  # Time step
-    u = np.exp(volatility * np.sqrt(dt))  # Up factor
-    d = 1 / u  # Down factor
+    dt = time_to_expiry / num_steps  
+    u = np.exp(volatility * np.sqrt(dt))
+    d = 1 / u 
     p = (np.exp(risk_free_rate * dt) - d) / (u - d)  
 
     asset_prices = np.zeros((num_steps + 1, num_steps + 1))
@@ -205,12 +207,12 @@ def main():
     if option == 'Black Scholes Pricing':
         st.title("Black-Scholes Option Pricing and Greek Visualizations")
         st.sidebar.header("Inputs")
-        spot_price = st.sidebar.slider('Stock Price', min_value=0.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
-        strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=0.0, max_value=40000.0, key='strike_price')
-        time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=0.0, key='time_to_expiry')
+        spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
+        strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
+        time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
-        volatility = st.sidebar.slider('Volatility (%)', min_value=0.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
-        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
+        volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
+        risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
         
         st.sidebar.header("Inputs for Black Scholes")
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
@@ -228,13 +230,13 @@ def main():
     elif option == 'Monte Carlo Simulation':
         st.title("Monte Carlo Simulation")
         st.sidebar.header("Inputs")
-        num_steps = st.sidebar.slider("Number of Steps", value=252, min_value=1, key='num_steps_mc')
-        num_simulations = st.sidebar.slider("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
-        spot_price = st.sidebar.slider('Stock Price', min_value=0.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
-        strike_price = st.sidebar.slider("Strike Price", value=25000.0, min_value=0.0, max_value=40000.0, key='strike_price')
-        time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
-        volatility = st.sidebar.slider('Volatility (%)', min_value=0.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
-        risk_free_rate = st.sidebar.slider('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
+        num_steps = st.sidebar.number_input("Number of Steps", value=252, min_value=1, key='num_steps_mc')
+        num_simulations = st.sidebar.number_input("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
+        spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
+        strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
+        time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
+        volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
+        risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
         
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
         monte_carlo_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations))
@@ -248,17 +250,18 @@ def main():
         st.title("Binomial Pricing for Nifty")
 
         option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
-        spot_price = st.sidebar.slider("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=1.0)
-        volatility = st.sidebar.slider("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
-        risk_free_rate = st.sidebar.slider("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
-        time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", min_value=0.01, max_value=5.0, value=1.0, step=0.01)
-        num_steps = st.sidebar.slider("Number of Steps", value=10, min_value=10, max_value=50, step=10)
+        spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=5.0)
+        strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
+        time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", min_value=0.01, max_value=1.0, value=1.0, step=0.01)
+        volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
+        risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
+        num_steps = st.sidebar.number_input("Number of Steps", value=10, min_value=10, max_value=50, step=10)
 
         bs = BlackScholes(risk_free_rate, spot_price, strike_price, time_to_expiry, volatility)
 
         option_price = bs.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate, num_steps, volatility, option_type.lower())
     
-        st.write(f"The calculated stock price is: **{option_price:.2f}**")
+        st.write(f"The calculated option value is: **{option_price:.2f}**")
 
         if st.sidebar.button('Run'):
             binomial_tree_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type)
