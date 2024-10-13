@@ -101,24 +101,42 @@ class BlackScholes:
         option_price = np.exp(-self.r * self.t) * np.mean(payoffs)
         return option_price
 
-    def american_option_pricing(self,s,k,t,r,n,sigma,option_type='call'):
-        n=int(n)
-        dt= t/n
-        u=np.exp(sigma*np.sqrt(dt))
-        d=1/u
-        p=(np.exp(r*dt)-d)/(u-d)
+    import numpy as np
 
-        price = np.zeros(n+1)
-        for i in range(n+1):
-            price[i] = s*(u ** i)*(d ** (n-i))
-            values = np.max(0,price-k) if option_type=='call' else np.maximum(0,k-price)
+    def american_option_pricing(self, s, k, t, r, n, sigma, option_type='call'):
+        n = int(n)
+        dt = t / n
+        u = np.exp(sigma * np.sqrt(dt))  # Up factor
+        d = 1 / u                        # Down factor
+        p = (np.exp(r * dt) - d) / (u - d)  # Risk-neutral probability
 
-            for j in range(n-1,-1,-1):
-                for j in range(j+1):
-                    price[i]=(p*values[i+1]+(1-p)*values[i]*np.exp(-r*dt))
-                    values[i]=np.maximum(price[i]-k,price[i])
+        price = np.zeros(n + 1)
+        values = np.zeros(n + 1)
 
-            return values[0]
+        for i in range(n + 1):
+            price[i] = s * (u ** i) * (d ** (n - i))
+
+        if option_type == 'call':
+            values = np.maximum(0, price - k)
+        elif option_type == 'put':
+            values = np.maximum(0, k - price)
+        else:
+            raise ValueError("option_type should be 'call' or 'put'")
+
+    
+        for j in range(n - 1, -1, -1):
+            for i in range(j + 1):
+                price[i] = s * (u ** i) * (d ** (j - i))
+            
+                values[i] = (p * values[i + 1] + (1 - p) * values[i]) * np.exp(-r * dt)
+            
+                if option_type == 'call':
+                    values[i] = np.maximum(values[i], price[i] - k)
+                elif option_type == 'put':
+                    values[i] = np.maximum(values[i], k - price[i])
+
+        return values[0]
+
 
 def monte_carlo_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_simulations=1000, num_steps=252):
     dt = time_to_expiry / num_steps
@@ -231,6 +249,7 @@ def main():
         risk_free_rate = st.sidebar.slider("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
         time_to_expiry = st.sidebar.slider("Time to Expiry (Years)", min_value=0.0, max_value=2.0, value=1.0)
         num_steps = st.sidebar.slider("Number of Steps", value=10.0, min_value=1.0, max_value=30.0, step=1.0)
+        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
         
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
         binomial_option_price = bs_model.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate,num_steps, volatility, option_type)
