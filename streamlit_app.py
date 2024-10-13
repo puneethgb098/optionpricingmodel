@@ -200,7 +200,7 @@ def main():
     risk_free_rate = 5.0
     num_steps=10.0
 
-    option = st.sidebar.selectbox("Pick a strategy", ['Black Scholes Pricing', 'Monte Carlo Simulation', 'Binomial Option Pricing American Options'], key='option_strategy')
+    option = st.sidebar.selectbox("Pick a strategy", ['Black Scholes Pricing', 'Monte Carlo Simulation', 'Binomial Tree Forecasting'], key='option_strategy')
 
     if option == 'Black Scholes Pricing':
         st.title("Black-Scholes Option Pricing and Greek Visualizations")
