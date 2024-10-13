@@ -258,7 +258,7 @@ def main():
 
         option_price = bs.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate, num_steps, volatility, option_type.lower())
     
-        st.write(f"The calculated price for the {option_type} option is: **{option_price:.2f}**")
+        st.write(f"The calculated stock price is: **{option_price:.2f}**")
 
         if st.sidebar.button('Run'):
             binomial_tree_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type)
