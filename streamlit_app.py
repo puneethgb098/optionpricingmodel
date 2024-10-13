@@ -134,7 +134,7 @@ def monte_carlo_pricing_visualization(spot_price, strike_price, time_to_expiry, 
     for i in range(num_simulations):
         fig.add_trace(go.Scatter(x=np.linspace(0, time_to_expiry, num_steps), y=asset_paths[:, i], mode='lines', line=dict(width=1)))
     
-    fig.update_layout(title="Monte Carlo Simulation: Asset Price Paths", xaxis_title="Time (Years)", yaxis_title="Asset Price", showlegend=False)
+    fig.update_layout(title="Asset Price Paths", xaxis_title="Time (Years)", yaxis_title="Asset Price", showlegend=False)
 
     return fig
 
@@ -223,6 +223,7 @@ def main():
             
     else:
         st.sidebar.header("Binomial Pricing for American Options")
+        st.title("Binomial Pricing for American Options")
         spot_price = st.sidebar.slider("Stock Price", min_value=0.0, max_value=30000.0, value=24975.0, step=1.0)
         strike_price = st.sidebar.slider("Strike Price", min_value=0.0, max_value=25000.0, value=30000.0, step=1.0)
         volatility = st.sidebar.slider("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
