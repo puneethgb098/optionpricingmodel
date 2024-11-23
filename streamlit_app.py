@@ -175,17 +175,9 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
     for i in range(num_steps + 1):
         for j in range(i + 1):
             fig.add_trace(
-                go.Scatter(
-                    x=[i], 
-                    y=[asset_prices[j, i]],
-                    mode='markers+text',
-                    marker=dict(size=12, color='blue', symbol='circle'),
-                    text=f"{asset_prices[j, i]:.2f}",
-                    textfont=dict(size=10, color='darkblue'),
-                    textposition='top center',
-                    showlegend=False
-                )
-            )
+                go.Scatter(x=[i], y=[asset_prices[j, i]],mode='markers+text',
+                    marker=dict(size=12, color='blue'),text=f"{asset_prices[j, i]:.2f}",textfont=dict(size=10, color='darkblue'),textposition='top center',
+                    showlegend=False))
 
     for i in range(num_steps):
         for j in range(i + 1):
