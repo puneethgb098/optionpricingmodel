@@ -158,9 +158,10 @@ def monte_carlo_pricing_visualization(option_value, strike_price, time_to_expiry
 
 
 def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type='Call'):
+
     dt = time_to_expiry / num_steps  
-    u = np.exp(volatility * np.sqrt(dt))
-    d = 1 / u 
+    u = np.exp(volatility * np.sqrt(dt))  
+    d = 1 / u                            
     p = (np.exp(risk_free_rate * dt) - d) / (u - d)  
 
     asset_prices = np.zeros((num_steps + 1, num_steps + 1))
@@ -173,15 +174,35 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
 
     for i in range(num_steps + 1):
         for j in range(i + 1):
-            fig.add_trace(go.Scatter(x=[i], y=[asset_prices[j, i]],mode='markers+text',marker=dict(size=10, color='blue'),text=f"{asset_prices[j, i]:.2f}",textposition='top center',showlegend=False))
+            fig.add_trace(
+                go.Scatter(
+                    x=[i], 
+                    y=[asset_prices[j, i]],
+                    mode='markers+text',
+                    marker=dict(size=12, color='blue', symbol='circle'),
+                    text=f"{asset_prices[j, i]:.2f}",
+                    textfont=dict(size=10, color='darkblue'),
+                    textposition='top center',
+                    showlegend=False
+                )
+            )
 
     for i in range(num_steps):
         for j in range(i + 1):
-            fig.add_trace(go.Scatter(x=[i, i + 1], y=[asset_prices[j, i], asset_prices[j, i + 1]],mode='lines', line=dict(color='gray', dash='dash'),showlegend=False))
-            fig.add_trace(go.Scatter(x=[i, i + 1], y=[asset_prices[j, i], asset_prices[j + 1, i + 1]],mode='lines', line=dict(color='gray', dash='dash'),showlegend=False))
-    fig.update_layout(title=f"Binomial Tree for {option_type} Option Pricing",xaxis_title="Step",yaxis_title="Asset Price",xaxis=dict(tickmode='linear', tick0=0, dtick=1),yaxis=dict(tickmode='linear'),showlegend=False,height=600,width=800)
- 
-    return fig
+            fig.add_trace(
+                go.Scatter(x=[i, i + 1], y=[asset_prices[j, i], asset_prices[j, i + 1]],
+                    mode='lines',line=dict(color='gray', width=1, dash='dot'),
+                    showlegend=False))
+            fig.add_trace(go.Scatter(x=[i, i + 1], y=[asset_prices[j, i], asset_prices[j + 1, i + 1]],
+                    mode='lines',line=dict(color='gray', width=1, dash='dot'),showlegend=False))
+
+    fig.update_layout(title=dict(text=f"Binomial Tree for {option_type} Option Pricing",x=0.5),
+        xaxis=dict(title="Time Step",tickmode='linear',tick0=0,dtick=1,titlefont=dict(size=16),gridcolor='lightgray'),
+        yaxis=dict(title="Asset Price",titlefont=dict(size=16),gridcolor='lightgray'),
+        plot_bgcolor='white',height=700,width=900)
+
+    fig.add_shape(type="rect",x0=-0.5, y0=0, x1=num_steps + 0.5, y1=max(asset_prices[:, -1]) * 1.1,
+        fillcolor="lightblue",opacity=0.1,layer="below",line_width=0)
 
 def fetch_nifty():
     try:
