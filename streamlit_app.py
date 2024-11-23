@@ -196,6 +196,8 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
     fig.add_shape(type="rect",x0=-0.5, y0=0, x1=num_steps + 0.5, y1=max(asset_prices[:, -1]) * 1.1,
         fillcolor="lightblue",opacity=0.1,layer="below",line_width=0)
 
+    return fig
+
 def fetch_nifty():
     try:
         nifty_latest = yf.download('^NSEI', interval = '1m', period = '1d')
