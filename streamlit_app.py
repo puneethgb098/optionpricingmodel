@@ -289,61 +289,8 @@ def main():
                     put_fig = bs_model.greek_visualisation("Put", greek)
                     st.plotly_chart(put_fig, use_container_width=True)
 
-    elif option == 'Monte Carlo Simulation':
-        st.title("Monte Carlo Simulation")
-        st.sidebar.header("Inputs")
-        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='options_type')
-        num_steps = st.sidebar.number_input("Number of Steps", value=252, min_value=1, key='num_steps_mc')
-        num_simulations = st.sidebar.number_input("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
-        spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
-        strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
-        time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
-        volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
-        risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
-        
-        bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
-        monte_carlo_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations))
-        if st.sidebar.button("Run"):
-            st.sidebar.write(f"Monte Carlo Option Price: {monte_carlo_price}")
-            simulation_fig = monte_carlo_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility / 100, risk_free_rate / 100, num_simulations, int(num_steps))
-            st.plotly_chart(simulation_fig)
-            
-    else:
-        st.sidebar.header("Inputs")
-        st.title("Binomial Pricing for Nifty")
-
-        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
-        spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=5.0)
-        strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
-        time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", min_value=0.01, max_value=1.0, value=1.0, step=0.01)
-        volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
-        risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
-        num_steps = st.sidebar.number_input("Number of Steps", value=10, min_value=10, max_value=50, step=10)
-
-        bs = BlackScholes(risk_free_rate, spot_price, strike_price, time_to_expiry, volatility)
-
-        option_price = bs.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate, num_steps, volatility, option_type.lower())
-    
-        st.write(f"The calculated option value is: **{option_price:.2f}**")
-
-        if st.sidebar.button('Run'):
-            binomial_tree_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type)
-            st.plotly_chart(binomial_tree_fig)
-
-if __name__ == "__main__":
-    main()
-
-st.sidebar.text("")
-st.sidebar.text("")
-st.sidebar.text("")
-st.sidebar.text("")
-col1, col2 = st.sidebar.columns(2)
-col1.text("Linkedin:")
-col1.page_link("https://www.linkedin.com/in/puneeth-g-b-463aa91a0/",label="Puneeth G B")
-st.sidebar.text("")
-st.sidebar.text("")
-if st.button("Explain Black Scholes and Greeks"):
-    st.write("""
+        if st.button("Explain Black Scholes and Greeks"):
+           st.write("""
     The Black-Scholes model is a mathematical model used to price European call and put options. 
     It assumes:
     - The option can only be exercised at expiration (European-style).
@@ -382,3 +329,56 @@ if st.button("Explain Black Scholes and Greeks"):
 
     **Note:** This app provides tools to calculate and visualize these metrics.
     """)
+
+    elif option == 'Monte Carlo Simulation':
+        st.title("Monte Carlo Simulation")
+        st.sidebar.header("Inputs")
+        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='options_type')
+        num_steps = st.sidebar.number_input("Number of Steps", value=252, min_value=1, key='num_steps_mc')
+        num_simulations = st.sidebar.number_input("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
+        spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
+        strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
+        time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
+        volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
+        risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
+        
+        bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
+        monte_carlo_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations))
+        st.write(f"Monte Carlo Option Price: {monte_carlo_price:.2f}")
+        simulation_fig = monte_carlo_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility / 100, risk_free_rate / 100, num_simulations, int(num_steps))
+        st.plotly_chart(simulation_fig)
+            
+    else:
+        st.sidebar.header("Inputs")
+        st.title("Binomial Pricing for Nifty")
+
+        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
+        spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=5.0)
+        strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
+        time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", min_value=0.01, max_value=1.0, value=1.0, step=0.01)
+        volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
+        risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
+        num_steps = st.sidebar.number_input("Number of Steps", value=10, min_value=10, max_value=50, step=10)
+
+        bs = BlackScholes(risk_free_rate, spot_price, strike_price, time_to_expiry, volatility)
+
+        option_price = bs.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate, num_steps, volatility, option_type.lower())
+    
+        st.write(f"The calculated option value is: **{option_price:.2f}**")
+
+        if st.sidebar.button('Run'):
+            binomial_tree_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type)
+            st.plotly_chart(binomial_tree_fig)
+
+if __name__ == "__main__":
+    main()
+
+st.sidebar.text("")
+st.sidebar.text("")
+st.sidebar.text("")
+st.sidebar.text("")
+col1, col2 = st.sidebar.columns(2)
+col1.text("Linkedin:")
+col1.page_link("https://www.linkedin.com/in/puneeth-g-b-463aa91a0/",label="Puneeth G B")
+st.sidebar.text("")
+st.sidebar.text("")
