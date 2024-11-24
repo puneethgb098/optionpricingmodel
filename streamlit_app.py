@@ -289,7 +289,6 @@ def main():
                     put_fig = bs_model.greek_visualisation("Put", greek)
                     st.plotly_chart(put_fig, use_container_width=True)
 
-            
     elif option == 'Monte Carlo Simulation':
         st.title("Monte Carlo Simulation")
         st.sidebar.header("Inputs")
@@ -341,3 +340,46 @@ st.sidebar.text("")
 col1, col2 = st.sidebar.columns(2)
 col1.text("Linkedin:")
 col1.page_link("https://www.linkedin.com/in/puneeth-g-b-463aa91a0/",label="Puneeth G B")
+st.sidebar.text("")
+st.sidebar.text("")
+if st.button("Explain Black Scholes and Greeks"):
+    st.write("""
+    The Black-Scholes model is a mathematical model used to price European call and put options. 
+    It assumes:
+    - The option can only be exercised at expiration (European-style).
+    - The price of the underlying asset follows a geometric Brownian motion.
+    - Constant volatility and interest rate.
+
+    The formula for a European option price is:
+    \\[
+    call_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    \\]
+                     
+    \\[
+    put_price = put_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+    \\]
+    where:
+    - \\( S_0 \\): Current stock price
+    - \\( X \\): Strike price
+    - \\( T \\): Time to expiration
+    - \\( r \\): Risk-free interest rate
+    - \\( \\sigma \\): Volatility of the underlying asset
+    - \\( N(d) \\): Cumulative distribution function of the standard normal distribution
+    - \\( d1 \\) = (np.log(S / K) + (r + (sigma**2) / 2) * T) / (sigma * np.sqrt(T))
+    - \\( d2 \\) = d1 - sigma * np.sqrt(T)
+
+    ## Option Greeks
+    Option Greeks measure the sensitivity of an option's price to various factors:
+    - **Delta (Δ):** Sensitivity to changes in the price of the underlying asset.
+    - **Gamma (Γ):** Sensitivity of Delta to changes in the price of the underlying asset.
+    - **Theta (Θ):** Sensitivity to the passage of time (time decay).
+    - **Vega (ν):** Sensitivity to changes in volatility.
+    - **Rho (ρ):** Sensitivity to changes in the risk-free interest rate.
+
+    ### Example Use Cases:
+    - Use Delta to hedge your portfolio.
+    - Monitor Vega for options in volatile markets.
+    - Understand Theta to manage time decay in your strategies.
+
+    **Note:** This app provides tools to calculate and visualize these metrics.
+    """)
