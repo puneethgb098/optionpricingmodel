@@ -8,6 +8,9 @@ import requests
 import re
 import streamlit as st
 import yfinance as yf
+from plotly.subplots import make_subplots
+from scipy.stats import lognorm
+from scipy.stats import gaussian_kde
 
 class BlackScholes:
     def __init__(self, r, s, k, t, sigma):
@@ -155,20 +158,43 @@ class BlackScholes:
 
 
 def monte_carlo_pricing_visualization(option_value, strike_price, time_to_expiry, volatility, risk_free_rate, num_simulations=1000, num_steps=252):
-    dt = time_to_expiry / num_steps
-    asset_paths = np.zeros((num_steps, num_simulations))
-    asset_paths[0] = option_value
+    dt = time_to_expiry / num_steps 
+    asset_paths = np.zeros((num_steps, num_simulations)) 
+    asset_paths[0] = option_value  
 
+    # Simulate asset price paths
     for t in range(1, num_steps):
-        rand = np.random.standard_normal(num_simulations)
+        rand = np.random.standard_normal(num_simulations)  
         asset_paths[t] = asset_paths[t - 1] * np.exp((risk_free_rate - 0.5 * volatility ** 2) * dt + volatility * np.sqrt(dt) * rand)
 
-    fig = go.Figure()
+    final_prices = asset_paths[-1, :]
+
+    kde = gaussian_kde(final_prices)
+    price_range = np.linspace(min(final_prices), max(final_prices), 1000)
+    pdf_values = kde(price_range)
+
     
+    fig = make_subplots(
+        rows=2, cols=1, 
+        subplot_titles=("Asset Price Paths", "PDF of Final Asset Prices"),
+        row_heights=[0.7, 0.3] )
+
     for i in range(num_simulations):
-        fig.add_trace(go.Scatter(x=np.linspace(0, time_to_expiry, num_steps), y=asset_paths[:, i], mode='lines', line=dict(width=1)))
-    
-    fig.update_layout(title="Asset Price Paths", xaxis_title="Time (Years)", yaxis_title="Asset Price", showlegend=False)
+        fig.add_trace(
+            go.Scatter(x=np.linspace(0, time_to_expiry, num_steps), y=asset_paths[:, i], mode='lines', line=dict(width=1)),
+            row=1, col=1  )
+    fig.add_trace(
+        go.Histogram(x=final_prices, nbinsx=50, histnorm='probability', name="Histogram of Final Asset Prices", opacity=0.6, marker=dict(color='blue')),
+        row=2, col=1 )
+
+    fig.update_layout(
+        xaxis_title="Time (Years)",  
+        yaxis_title="Asset Price",   
+        xaxis2_title="Asset Price", 
+        yaxis2_title="Density",     
+        showlegend=False,
+        height=800  
+    )
 
     return fig
 
@@ -332,8 +358,9 @@ def main():
 
     elif option == 'Monte Carlo Simulation':
         st.title("Monte Carlo Simulation")
+    
+    # Sidebar Inputs
         st.sidebar.header("Inputs")
-        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='options_type')
         num_steps = st.sidebar.number_input("Number of Steps", value=252, min_value=1, key='num_steps_mc')
         num_simulations = st.sidebar.number_input("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
         spot_price = st.sidebar.number_input('Stock Price', min_value=1.0, max_value=40000.0, value=nifty_price, step=5.0, key='spot_price')
@@ -341,13 +368,25 @@ def main():
         time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", value=1.0, key='time_to_expiry')
         volatility = st.sidebar.number_input('Volatility (%)', min_value=1.0, max_value=100.0, value=20.0, step=0.25, key='volatility')
         risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
-        
+
         bs_model = BlackScholes(r=risk_free_rate / 100, s=spot_price, k=strike_price, t=time_to_expiry, sigma=volatility / 100)
-        monte_carlo_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations))
-        st.write(f"Monte Carlo Option Price: {monte_carlo_price:.2f}")
+
+        monte_carlo_call_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations), option_type='call')
+        monte_carlo_put_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations), option_type='put')
+        
+        with st.container(border=True):
+            st.write('### Option Price')
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.metric(label="Call option Price:",value=f"{monte_carlo_call_price:.2f}")
+    
+            with col2:
+                st.metric(label = "Put Option Price:",value=f"{monte_carlo_put_price:.2f}")
+        
         simulation_fig = monte_carlo_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility / 100, risk_free_rate / 100, num_simulations, int(num_steps))
         st.plotly_chart(simulation_fig)
-            
+
     else:
         st.sidebar.header("Inputs")
         st.title("Binomial Pricing for Nifty")
