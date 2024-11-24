@@ -351,19 +351,18 @@ if st.button("Explain Black Scholes and Greeks"):
     - Constant volatility and interest rate.
 
     The formula for a European option price is:
-    \\[
+    \\
     call_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
-    \\]
-                     
-    \\[
+    \\
     put_price = put_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
-    \\]
+    \\
+    \\
     where:
-    - \\( S_0 \\): Current stock price
+    - \\( S0 \\): Current stock price
     - \\( X \\): Strike price
     - \\( T \\): Time to expiration
     - \\( r \\): Risk-free interest rate
-    - \\( \\sigma \\): Volatility of the underlying asset
+    - \\( sigma \\): Volatility of the underlying asset
     - \\( N(d) \\): Cumulative distribution function of the standard normal distribution
     - \\( d1 \\) = (np.log(S / K) + (r + (sigma**2) / 2) * T) / (sigma * np.sqrt(T))
     - \\( d2 \\) = d1 - sigma * np.sqrt(T)
