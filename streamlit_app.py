@@ -244,53 +244,51 @@ def main():
         risk_free_rate = st.sidebar.number_input('Risk Free Rate (%)', min_value=0.0, max_value=20.0, value=5.0, step=0.01, key='risk_free_rate')
 
         bs_model = BlackScholes(
-                r=risk_free_rate / 100, 
-                s=spot_price, 
-                k=strike_price, 
-                t=time_to_expiry, 
-                sigma=volatility / 100)
-            
-        st.write("### Option Price")
+            r=risk_free_rate / 100, 
+            s=spot_price, 
+            k=strike_price, 
+            t=time_to_expiry, 
+            sigma=volatility / 100)
+    
+        with st.container(border=True):
+            st.write("### Option Price")
 
-        call_price = bs_model.option("Call")
-        put_price = bs_model.option("Put")
+            call_price = bs_model.option("Call")
+            put_price = bs_model.option("Put")
 
-        call_greeks = bs_model.greeks("Call")
-        put_greeks = bs_model.greeks("Put")
-            
-        container = st.container()
-        col1, col2 = container.columns(2)
-        with col1:
+            call_greeks = bs_model.greeks("Call")
+            put_greeks = bs_model.greeks("Put")
+
+            col1, col2 = st.columns(2)
+            with col1:
                 st.metric(label="Call Option Price", value=f"{call_price:.4f}")
-        with col2:
+            with col2:
                 st.metric(label="Put Option Price", value=f"{put_price:.4f}")
         
-
-        st.write("### Greek Values")
-        greek_table = pd.DataFrame(
-                [
-                [f"{call_greeks['delta']:.4f}",f"{call_greeks['gamma']:.4f}",f"{call_greeks['theta']:.4f}",f"{call_greeks['vega']:.4f}",f"{call_greeks['rho']:.4f}"],
-                [f"{put_greeks['delta']:.4f}",f"{put_greeks['gamma']:.4f}", f"{put_greeks['theta']:.4f}",f"{put_greeks['vega']:.4f}",f"{put_greeks['rho']:.4f}"]],
-                index=['Call Greeks', 'Put Greeks'], 
-                columns=['Delta', 'Gamma', 'Theta', 'Vega', 'Rho'])
-
-        st.table(greek_table)
-
-        st.write("### Greek Visualizations")
-        greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho']
+        with st.container(border=True):
+            st.write("### Greek Values")
+            greek_table = pd.DataFrame([[f"{call_greeks['delta']:.4f}", f"{call_greeks['gamma']:.4f}", f"{call_greeks['theta']:.4f}", f"{call_greeks['vega']:.4f}", f"{call_greeks['rho']:.4f}"],[f"{put_greeks['delta']:.4f}", f"{put_greeks['gamma']:.4f}", f"{put_greeks['theta']:.4f}", f"{put_greeks['vega']:.4f}", f"{put_greeks['rho']:.4f}"]],
+            index=['Call Greeks', 'Put Greeks'],
+            columns=['Delta', 'Gamma', 'Theta', 'Vega', 'Rho']
+        )
         
-        col1, col2 = st.columns(2)
-        
-        for greek in greek_types:
-            with col1:
-                st.subheader(f"Call: {greek.capitalize()}")
-                call_fig = bs_model.greek_visualisation("Call", greek)
-                st.plotly_chart(call_fig, use_container_width=True)
+            st.table(greek_table)
             
-            with col2:
-                st.subheader(f"Put: {greek.capitalize()}")
-                put_fig = bs_model.greek_visualisation("Put", greek)
-                st.plotly_chart(put_fig, use_container_width=True)
+        with st.container(border=True):
+            st.write("### Greek Visualizations")
+            greek_types = ['delta', 'gamma', 'theta', 'vega', 'rho']
+
+            col1, col2 = st.columns(2)
+        
+            for greek in greek_types:
+                with col1:
+                    call_fig = bs_model.greek_visualisation("Call", greek)
+                    st.plotly_chart(call_fig, use_container_width=True)
+            
+                with col2:
+                    put_fig = bs_model.greek_visualisation("Put", greek)
+                    st.plotly_chart(put_fig, use_container_width=True)
+
             
     elif option == 'Monte Carlo Simulation':
         st.title("Monte Carlo Simulation")
