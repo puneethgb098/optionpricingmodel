@@ -112,9 +112,9 @@ class BlackScholes:
         Z = np.random.standard_normal(num_simulations)
         ST = self.s * np.exp((self.r - 0.5 * self.sigma**2) * self.t + self.sigma * np.sqrt(self.t) * Z)
         if option_type == 'call':
-            payoffs = np.maximum(ST - self.k, 0)  # Call option payoff
+            payoffs = np.maximum(ST - self.k, 0) 
         elif option_type == 'put':
-            payoffs = np.maximum(self.k - ST, 0)  # Put option payoff
+            payoffs = np.maximum(self.k - ST, 0)  
         else:
             raise ValueError("option_type should be 'call' or 'put'")
         option_price = np.exp(-self.r * self.t) * np.mean(payoffs)
@@ -175,27 +175,45 @@ def monte_carlo_pricing_visualization(option_value, strike_price, time_to_expiry
 
     
     fig = make_subplots(
-        rows=2, cols=1, 
-        subplot_titles=("Asset Price Paths", "PDF of Final Asset Prices"),
-        row_heights=[0.7, 0.3] )
+    rows=1, cols=2,  
+    subplot_titles=("Asset Price Paths", "PDF of Final Asset Prices"),
+    column_widths=[0.7, 0.3]
+)
 
     for i in range(num_simulations):
         fig.add_trace(
-            go.Scatter(x=np.linspace(0, time_to_expiry, num_steps), y=asset_paths[:, i], mode='lines', line=dict(width=1)),
-            row=1, col=1  )
-    fig.add_trace(
-        go.Histogram(x=final_prices, nbinsx=50, histnorm='probability', name="Histogram of Final Asset Prices", opacity=0.6, marker=dict(color='blue')),
-        row=2, col=1 )
-
-    fig.update_layout(
-        xaxis_title="Time (Years)",  
-        yaxis_title="Asset Price",   
-        xaxis2_title="Asset Price", 
-        yaxis2_title="Density",     
-        showlegend=False,
-        height=800  
+        go.Scatter(
+            x=np.linspace(0, time_to_expiry, num_steps),
+            y=asset_paths[:, i],
+            mode='lines',
+            line=dict(width=1),
+            showlegend=False
+        ),
+        row=1, col=1
     )
 
+    fig.add_trace(
+    go.Histogram(
+        y=final_prices, 
+        nbinsy=50,
+        histnorm='probability',
+        showlegend=False,
+        opacity=0.6,
+        marker=dict(color='blue'),
+    ),
+    row=1, col=2
+)
+
+    fig.update_layout(
+    title="Monte Carlo Simulation and PDF of Final Asset Prices",
+    template="plotly_white",
+    xaxis_title="Time to Expiry",
+    yaxis_title="Asset Price",
+    xaxis2_title="Probability",
+    yaxis2_title="Final Asset Prices",
+    bargap=0.2
+
+)
     return fig
 
 def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type='Call'):
@@ -375,7 +393,6 @@ def main():
         monte_carlo_put_price = bs_model.monte_carlo_pricing(num_simulations=int(num_simulations), option_type='put')
         
         with st.container(border=True):
-            st.write('### Option Price')
             col1, col2 = st.columns(2)
 
             with col1:
@@ -384,8 +401,9 @@ def main():
             with col2:
                 st.metric(label = "Put Option Price:",value=f"{monte_carlo_put_price:.2f}")
         
-        simulation_fig = monte_carlo_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility / 100, risk_free_rate / 100, num_simulations, int(num_steps))
-        st.plotly_chart(simulation_fig)
+        with st.container(border=True):
+            simulation_fig = monte_carlo_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility / 100, risk_free_rate / 100, num_simulations, int(num_steps))
+            st.plotly_chart(simulation_fig)
 
     else:
         st.sidebar.header("Inputs")
