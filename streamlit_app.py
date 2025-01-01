@@ -336,7 +336,7 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
         showlegend=False
     )
 
-    return fig
+    return fig, call_option_values, put_option_values
 
 def fetch_nifty():
     try:
@@ -488,22 +488,32 @@ def main():
         st.sidebar.header("Inputs")
         st.title("Binomial Option Pricing")
 
-# Input fields
         spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=5.0)
-        strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
+        strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0)
         time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", min_value=0.01, max_value=1.0, value=1.0, step=0.01)
         volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, max_value=100.0, value=20.0) / 100
         risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
         num_steps = st.sidebar.number_input("Number of Steps", value=10, min_value=10, max_value=50, step=10)
 
         binomial_tree_fig, call_option_values, put_option_values = binomial_pricing_visualization(
-            spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps
-        )
+            spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps)
+
+        with st.container():
+            call_price = call_option_values[0][0]
+            put_price = put_option_values[0][0]
+    
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric(label="Call Option Price", value=f"{call_price:.4f}")
+            with col2:
+                st.metric(label="Put Option Price", value=f"{put_price:.4f}")
+
         st.plotly_chart(binomial_tree_fig)
+
         option_prices_df = pd.DataFrame({
-            'Option Type': ['Call Option', 'Put Option'],
-            'Price': [call_option_values[0][0], put_option_values[0][0]]
-        })
+            'Call Option Price': [call_price],
+            'Put Option Price': [put_price]})
+
         st.table(option_prices_df)
 
 if __name__ == "__main__":
