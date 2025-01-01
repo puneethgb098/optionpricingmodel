@@ -252,7 +252,7 @@ def american_option_pricing(self, s, k, t, r, n, sigma, option_type='call'):
 
         return option_value[0, 0]
 
-def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type='Call'):
+def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps):
     dt = time_to_expiry / num_steps  
     u = np.exp(volatility * np.sqrt(dt))  
     d = 1 / u                            
@@ -263,21 +263,22 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
         for j in range(i + 1):
             asset_prices[j, i] = spot_price * (u ** (i - j)) * (d ** j)
 
-    option_values = np.zeros_like(asset_prices)
+    call_option_values = np.zeros_like(asset_prices)
+    put_option_values = np.zeros_like(asset_prices)
+
     for i in range(num_steps + 1):
-        if option_type.lower() == 'call':
-            option_values[i, num_steps] = max(0, asset_prices[i, num_steps] - strike_price)
-        elif option_type.lower() == 'put':
-            option_values[i, num_steps] = max(0, strike_price - asset_prices[i, num_steps])
+        call_option_values[i, num_steps] = max(0, asset_prices[i, num_steps] - strike_price)
+        put_option_values[i, num_steps] = max(0, strike_price - asset_prices[i, num_steps])
 
     for i in range(num_steps - 1, -1, -1):
         for j in range(i + 1):
-            continuation_value = (p * option_values[j, i + 1] + (1 - p) * option_values[j + 1, i + 1]) * np.exp(-risk_free_rate * dt)
-            if option_type.lower() == 'call':
-                exercise_value = max(0, asset_prices[j, i] - strike_price)
-            elif option_type.lower() == 'put':
-                exercise_value = max(0, strike_price - asset_prices[j, i])
-            option_values[j, i] = max(continuation_value, exercise_value)
+            call_continuation_value = (p * call_option_values[j, i + 1] + (1 - p) * call_option_values[j + 1, i + 1]) * np.exp(-risk_free_rate * dt)
+            put_continuation_value = (p * put_option_values[j, i + 1] + (1 - p) * put_option_values[j + 1, i + 1]) * np.exp(-risk_free_rate * dt)
+            call_exercise_value = max(0, asset_prices[j, i] - strike_price)
+            put_exercise_value = max(0, strike_price - asset_prices[j, i])
+            
+            call_option_values[j, i] = max(call_continuation_value, call_exercise_value)
+            put_option_values[j, i] = max(put_continuation_value, put_exercise_value)
 
     final_prices = asset_prices[:, num_steps]
     mean_price = np.mean(final_prices)
@@ -285,7 +286,7 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
 
     fig = make_subplots(
         rows=1, cols=2,
-        subplot_titles=("Binomial Asset Tree", "Option Value Tree"),
+        subplot_titles=("Binomial Asset Tree", "Call and Put Option Value Tree"),
         column_widths=[0.6, 0.4]
     )
 
@@ -306,24 +307,36 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
         fig.add_trace(
             go.Scatter(
                 x=[i] * (i + 1),
-                y=option_values[:i + 1, i],
+                y=call_option_values[:i + 1, i],
                 mode='markers+lines',
-                name=f"Step {i}",
+                name=f"Call Step {i}",
                 marker=dict(size=6),
                 line=dict(dash='dot', color='green')
             ),
             row=1, col=2
         )
+        
+        fig.add_trace(
+            go.Scatter(
+                x=[i] * (i + 1),
+                y=put_option_values[:i + 1, i],
+                mode='markers+lines',
+                name=f"Put Step {i}",
+                marker=dict(size=6),
+                line=dict(dash='dot', color='red')
+            ),
+            row=1, col=2
+        )
 
     fig.update_layout(
-        title=f"Binomial Pricing Visualization ({option_type.capitalize()} Option)",
+        title="Binomial Pricing Visualization",
         xaxis_title="Steps",
         yaxis_title="Asset/Option Value",
         template="plotly_dark",
-        showlegend = False
+        showlegend=False
     )
 
-    return fig
+    return fig, call_option_values, put_option_values
 
 def fetch_nifty():
     try:
@@ -473,7 +486,7 @@ def main():
 
     else:
         st.sidebar.header("Inputs")
-        st.title("Binomial Pricing for Nifty")
+        st.title("Binomial Option Pricing")
 
         spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=5.0)
         strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
