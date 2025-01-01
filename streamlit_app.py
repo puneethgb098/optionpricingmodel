@@ -217,43 +217,90 @@ def monte_carlo_pricing_visualization(option_value, strike_price, time_to_expiry
     return fig
 
 def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type='Call'):
-
     dt = time_to_expiry / num_steps  
     u = np.exp(volatility * np.sqrt(dt))  
     d = 1 / u                            
     p = (np.exp(risk_free_rate * dt) - d) / (u - d)  
 
+    # Calculate asset prices and option values at each step
     asset_prices = np.zeros((num_steps + 1, num_steps + 1))
-
     for i in range(num_steps + 1):
         for j in range(i + 1):
             asset_prices[j, i] = spot_price * (u ** (i - j)) * (d ** j)
 
-    fig = go.Figure()
-
+    option_values = np.zeros_like(asset_prices)
     for i in range(num_steps + 1):
+        if option_type.lower() == 'call':
+            option_values[i, num_steps] = max(0, asset_prices[i, num_steps] - strike_price)
+        elif option_type.lower() == 'put':
+            option_values[i, num_steps] = max(0, strike_price - asset_prices[i, num_steps])
+
+    # Backward induction to calculate option values
+    for i in range(num_steps - 1, -1, -1):
         for j in range(i + 1):
-            fig.add_trace(
-                go.Scatter(x=[i], y=[asset_prices[j, i]],mode='markers+text',
-                    marker=dict(size=12, color='blue'),text=f"{asset_prices[j, i]:.2f}",textfont=dict(size=10, color='darkblue'),textposition='top center',
-                    showlegend=False))
+            continuation_value = (p * option_values[j, i + 1] + (1 - p) * option_values[j + 1, i + 1]) * np.exp(-risk_free_rate * dt)
+            if option_type.lower() == 'call':
+                exercise_value = max(0, asset_prices[j, i] - strike_price)
+            elif option_type.lower() == 'put':
+                exercise_value = max(0, strike_price - asset_prices[j, i])
+            option_values[j, i] = max(continuation_value, exercise_value)
 
-    for i in range(num_steps):
-        for j in range(i + 1):
-            fig.add_trace(
-                go.Scatter(x=[i, i + 1], y=[asset_prices[j, i], asset_prices[j, i + 1]],
-                    mode='lines',line=dict(color='gray', width=1, dash='dot'),
-                    showlegend=False))
-            fig.add_trace(go.Scatter(x=[i, i + 1], y=[asset_prices[j, i], asset_prices[j + 1, i + 1]],
-                    mode='lines',line=dict(color='gray', width=1, dash='dot'),showlegend=False))
+    # Statistical insights: Mean and variance of final prices
+    final_prices = asset_prices[:, num_steps]
+    mean_price = np.mean(final_prices)
+    variance_price = np.var(final_prices)
 
-    fig.update_layout(title=dict(text=f"Asset Price Path",x=0.5,),
-        xaxis=dict(title="Time Step",tickmode='linear',tick0=0,dtick=1,titlefont=dict(size=16),gridcolor='lightgray'),
-        yaxis=dict(title="Asset Price",titlefont=dict(size=16),gridcolor='lightgray'),
-        plot_bgcolor='white',height=700,width=900)
+    # Visualization
+    fig = make_subplots(
+        rows=1, cols=2,
+        subplot_titles=("Binomial Asset Tree", "Option Value Tree"),
+        column_widths=[0.6, 0.4]
+    )
 
-    fig.add_shape(type="rect",x0=-0.5, y0=0, x1=num_steps + 0.5, y1=max(asset_prices[:, -1]) * 1.1,
-        fillcolor="lightblue",opacity=0.1,layer="below",line_width=0)
+    # Plot asset prices tree
+    for i in range(num_steps + 1):
+        fig.add_trace(
+            go.Scatter(
+                x=[i] * (i + 1),
+                y=asset_prices[:i + 1, i],
+                mode='markers+lines',
+                name=f"Step {i}",
+                marker=dict(size=6),
+                line=dict(dash='dot')
+            ),
+            row=1, col=1
+        )
+
+    # Plot option values tree
+    for i in range(num_steps + 1):
+        fig.add_trace(
+            go.Scatter(
+                x=[i] * (i + 1),
+                y=option_values[:i + 1, i],
+                mode='markers+lines',
+                name=f"Step {i}",
+                marker=dict(size=6),
+                line=dict(dash='dot', color='green')
+            ),
+            row=1, col=2
+        )
+
+    fig.update_layout(
+        title=f"Binomial Pricing Visualization ({option_type.capitalize()} Option)",
+        xaxis_title="Steps",
+        yaxis_title="Asset/Option Value",
+        template="plotly_dark"
+    )
+
+    # Add mean and variance as annotations
+    fig.add_annotation(
+        text=f"Mean Final Price: {mean_price:.2f}<br>Variance: {variance_price:.2f}",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.2,
+        showarrow=False,
+        font=dict(size=12, color="white"),
+        align="center"
+    )
 
     return fig
 
