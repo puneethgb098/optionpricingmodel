@@ -336,7 +336,7 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
         showlegend=False
     )
 
-    return fig, call_option_values, put_option_values
+    return fig
 
 def fetch_nifty():
     try:
