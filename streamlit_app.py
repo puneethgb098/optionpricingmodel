@@ -501,7 +501,7 @@ def main():
     
         st.write(f"The calculated option value is: **{option_price:.2f}**")
         
-        binomial_tree_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type)
+        binomial_tree_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps)
         st.plotly_chart(binomial_tree_fig)
 
 if __name__ == "__main__":
