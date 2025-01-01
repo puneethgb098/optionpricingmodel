@@ -222,7 +222,6 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
     d = 1 / u                            
     p = (np.exp(risk_free_rate * dt) - d) / (u - d)  
 
-    # Calculate asset prices and option values at each step
     asset_prices = np.zeros((num_steps + 1, num_steps + 1))
     for i in range(num_steps + 1):
         for j in range(i + 1):
@@ -235,7 +234,6 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
         elif option_type.lower() == 'put':
             option_values[i, num_steps] = max(0, strike_price - asset_prices[i, num_steps])
 
-    # Backward induction to calculate option values
     for i in range(num_steps - 1, -1, -1):
         for j in range(i + 1):
             continuation_value = (p * option_values[j, i + 1] + (1 - p) * option_values[j + 1, i + 1]) * np.exp(-risk_free_rate * dt)
@@ -245,19 +243,12 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
                 exercise_value = max(0, strike_price - asset_prices[j, i])
             option_values[j, i] = max(continuation_value, exercise_value)
 
-    # Statistical insights: Mean and variance of final prices
-    final_prices = asset_prices[:, num_steps]
-    mean_price = np.mean(final_prices)
-    variance_price = np.var(final_prices)
-
-    # Visualization
     fig = make_subplots(
-        rows=1, cols=2,
-        subplot_titles=("Binomial Asset Tree", "Option Value Tree"),
-        column_widths=[0.6, 0.4]
+        rows=2, cols=1,
+        subplot_titles=("Call Option - Binomial Asset Tree", "Put Option - Binomial Asset Tree"),
+        row_heights=[0.5, 0.5]
     )
 
-    # Plot asset prices tree
     for i in range(num_steps + 1):
         fig.add_trace(
             go.Scatter(
@@ -271,7 +262,6 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
             row=1, col=1
         )
 
-    # Plot option values tree
     for i in range(num_steps + 1):
         fig.add_trace(
             go.Scatter(
@@ -282,7 +272,33 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
                 marker=dict(size=6),
                 line=dict(dash='dot', color='green')
             ),
-            row=1, col=2
+            row=1, col=1
+        )
+
+    for i in range(num_steps + 1):
+        fig.add_trace(
+            go.Scatter(
+                x=[i] * (i + 1),
+                y=asset_prices[:i + 1, i],
+                mode='markers+lines',
+                name=f"Step {i}",
+                marker=dict(size=6),
+                line=dict(dash='dot')
+            ),
+            row=2, col=1
+        )
+
+    for i in range(num_steps + 1):
+        fig.add_trace(
+            go.Scatter(
+                x=[i] * (i + 1),
+                y=option_values[:i + 1, i],
+                mode='markers+lines',
+                name=f"Step {i}",
+                marker=dict(size=6),
+                line=dict(dash='dot', color='red')
+            ),
+            row=2, col=1
         )
 
     fig.update_layout(
@@ -290,16 +306,6 @@ def binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, vol
         xaxis_title="Steps",
         yaxis_title="Asset/Option Value",
         template="plotly_dark"
-    )
-
-    # Add mean and variance as annotations
-    fig.add_annotation(
-        text=f"Mean Final Price: {mean_price:.2f}<br>Variance: {variance_price:.2f}",
-        xref="paper", yref="paper",
-        x=0.5, y=-0.2,
-        showarrow=False,
-        font=dict(size=12, color="white"),
-        align="center"
     )
 
     return fig
