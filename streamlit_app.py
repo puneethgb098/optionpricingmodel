@@ -444,7 +444,6 @@ def main():
     elif option == 'Monte Carlo Simulation':
         st.title("Monte Carlo Simulation")
     
-    # Sidebar Inputs
         st.sidebar.header("Inputs")
         num_steps = st.sidebar.number_input("Number of Steps", value=252, min_value=1, key='num_steps_mc')
         num_simulations = st.sidebar.number_input("Number of Simulations", value=1000, min_value=500, max_value=2000, step=100, key='num_simulations')
@@ -476,7 +475,6 @@ def main():
         st.sidebar.header("Inputs")
         st.title("Binomial Pricing for Nifty")
 
-        option_type = st.selectbox("Option Type", ['Call', 'Put'], key='option_type')
         spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=5.0)
         strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
         time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", min_value=0.01, max_value=1.0, value=1.0, step=0.01)
@@ -489,10 +487,9 @@ def main():
         option_price = bs.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate, num_steps, volatility, option_type.lower())
     
         st.write(f"The calculated option value is: **{option_price:.2f}**")
-
-        if st.sidebar.button('Run'):
-            binomial_tree_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type)
-            st.plotly_chart(binomial_tree_fig)
+        
+        binomial_tree_fig = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps, option_type)
+        st.plotly_chart(binomial_tree_fig)
 
 if __name__ == "__main__":
     main()
