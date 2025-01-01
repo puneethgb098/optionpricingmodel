@@ -488,6 +488,7 @@ def main():
         st.sidebar.header("Inputs")
         st.title("Binomial Option Pricing")
 
+# Input fields
         spot_price = st.sidebar.number_input("Stock Price", min_value=0.0, max_value=40000.0, value=24975.0, step=5.0)
         strike_price = st.sidebar.number_input("Strike Price", value=25000.0, min_value=1.0, max_value=40000.0, key='strike_price')
         time_to_expiry = st.sidebar.number_input("Time to Expiry (Years)", min_value=0.01, max_value=1.0, value=1.0, step=0.01)
@@ -495,18 +496,14 @@ def main():
         risk_free_rate = st.sidebar.number_input("Risk Free Rate (%)", min_value=0.0, max_value=20.0, value=5.0) / 100
         num_steps = st.sidebar.number_input("Number of Steps", value=10, min_value=10, max_value=50, step=10)
 
-        bs = BlackScholes(risk_free_rate, spot_price, strike_price, time_to_expiry, volatility)
-        option_type = 'call'  # or 'put' depending on your requirement
-        option_price = bs.american_option_pricing(spot_price, strike_price, time_to_expiry, risk_free_rate, num_steps, volatility, option_type.lower())
-        st.write(f"The calculated option value is: **{option_price:.2f}**")
-        binomial_tree_fig, call_option_values, put_option_values = binomial_pricing_visualization(spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps)
+        binomial_tree_fig, call_option_values, put_option_values = binomial_pricing_visualization(
+            spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps
+        )
         st.plotly_chart(binomial_tree_fig)
-
         option_prices_df = pd.DataFrame({
             'Option Type': ['Call Option', 'Put Option'],
-            'Price': [call_option_values[0, 0], put_option_values[0, 0]]
+            'Price': [call_option_values[0][0], put_option_values[0][0]]
         })
-
         st.table(option_prices_df)
 
 if __name__ == "__main__":
