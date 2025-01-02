@@ -498,7 +498,7 @@ def main():
         binomial_tree_fig, call_option_values, put_option_values = binomial_pricing_visualization(
             spot_price, strike_price, time_to_expiry, volatility, risk_free_rate, num_steps)
 
-        with st.container():
+        with st.container(border=True):
             call_price = call_option_values[0][0]
             put_price = put_option_values[0][0]
     
@@ -509,12 +509,6 @@ def main():
                 st.metric(label="Put Option Price", value=f"{put_price:.4f}")
 
         st.plotly_chart(binomial_tree_fig)
-
-        option_prices_df = pd.DataFrame({
-            'Call Option Price': [call_price],
-            'Put Option Price': [put_price]})
-
-        st.table(option_prices_df)
 
 if __name__ == "__main__":
     main()
